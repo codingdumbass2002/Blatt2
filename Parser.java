@@ -22,53 +22,82 @@ public class Parser {
    * @throws ExpressionNotWellFormedException
    *           if the expression is not well-formed, an exception is thrown
    */
-  public static int parse(String expression)
-      throws ExpressionNotWellFormedException {
-	  int first;
-	  int second;
-	  if (expression.length() == 0) {
-		  throw new ExpressionNotWellFormedException();
-	  }
-	  
-	  if (expression.length() == 1 && !number(expression.charAt(0))) {
-		  throw new ExpressionNotWellFormedException();
-	  }
-	  
-	  if (expression.length() < 5) {
-		  throw new ExpressionNotWellFormedException();
-	  }
-	  
-	  if (symbol(expression.charAt(0))) {
-		  throw new ExpressionNotWellFormedException();
-	  }
-	  
-	  if (expression.charAt(0) == ')') {
-		  throw new ExpressionNotWellFormedException();
-	  }
-	  
-	  
-	  if (expression.charAt(0) == '(') {
-		  if (number(expression.charAt(1)) && symbol(expression.charAt(2)) && number(expression.charAt(3)) && expression.charAt(4) == ')') {
-			  return expcalc(expression.charAt(1), expression.charAt(2), expression.charAt(4));
-		  }
-		  
-		  else  if (expression.charAt(1) == '(') {
-			  String new_String = expression.substring(1);
-			  return parse(new_String);
-		  }
-		  
-		  else if (number(expression.charAt(1)) && symbol(expression.charAt(2)) && expression.charAt(3) == '(') {
-			  String new_String = expression.substring(3);
-			  return parse(new_String);
-		  }
-		  throw new ExpressionNotWellFormedException();
-	  }
-	  
-	 
-	  				
+  public static int parse(String expression) throws ExpressionNotWellFormedException {
+	    if (expression.length() == 0) {
+	        throw new ExpressionNotWellFormedException();
+	    }
 
-    return 0;
-  }
+	    // this checks if the expression is a single number
+	    if (expression.matches("\\d")) {
+	        return Integer.parseInt(expression);
+	    }
+	    
+
+	    //this just checks if the expression starts and ends with parentheses
+	    if (expression.charAt(0) != '(' || expression.charAt(expression.length() - 1) != ')') {
+	        throw new ExpressionNotWellFormedException();
+	    }
+
+	    // Remove the outer parentheses to make my life easier
+	    expression = expression.substring(1, expression.length() - 1);
+
+	    // Split the expression into left and right subexpressions based on the operator
+	    int operatorIndex = findOperatorIndex(expression);
+	    if (operatorIndex == -1) {
+	        throw new ExpressionNotWellFormedException();
+	    }
+
+	    String leftExpression = expression.substring(0, operatorIndex);
+	    String rightExpression = expression.substring(operatorIndex + 1);
+
+	    // Parse the left and right subexpressions recursively
+	    int leftResult = parse(leftExpression);
+	    int rightResult = parse(rightExpression);
+
+	    // Evaluate the expression based on the operator
+	    char operator = expression.charAt(operatorIndex);
+	    return evaluateExpression(leftResult, operator, rightResult);
+	}
+
+	private static int findOperatorIndex(String expression) throws ExpressionNotWellFormedException{
+	    int parenthesesCount = 0;
+	    for (int i = expression.length() - 1; i >= 0; i--) {
+	        char c = expression.charAt(i);
+	        if (c == ' ') {
+	        	throw new ExpressionNotWellFormedException();
+	        }
+	        
+	        if (c == '(') {
+	            parenthesesCount++;
+	        } else if (c == ')') {
+	            parenthesesCount--;
+	        } else if (parenthesesCount == 0 && isOperator(c)) {
+	            return i;
+	        }
+	    }
+	    return -1;
+	}
+
+	private static boolean isOperator(char c) {
+	    return c == '+' || c == '-' || c == '*' || c == '/';
+	}
+
+	private static int evaluateExpression(int leftOperand, char operator, int rightOperand) {
+	    switch (operator) {
+	        case '+':
+	            return leftOperand + rightOperand;
+	        case '-':
+	            return leftOperand - rightOperand;
+	        case '*':
+	            return leftOperand * rightOperand;
+	        case '/':
+	            return leftOperand / rightOperand;
+	        default:
+	            throw new IllegalArgumentException("Invalid operator: " + operator);
+	    }
+	}
+
+  
   
   public static boolean number (char check) {
 	  if (check >= '0' && check <= '9') {
@@ -127,6 +156,7 @@ public class Parser {
       notWellFormedCheck("(   5    -7)");
       notWellFormedCheck("108");
       notWellFormedCheck("(8)");
+      
     }
   }
 
