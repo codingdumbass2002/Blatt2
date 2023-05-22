@@ -97,48 +97,6 @@ public class Parser {
 	    }
 	}
 
-  
-  
-  public static boolean number (char check) {
-	  if (check >= '0' && check <= '9') {
-		  return true;
-	  }
-	  return false;
-  }
-  
-  public static int expcalc (char char1, char sym, char char2) {
-	  int num1 = char1 - '0';
-	  int num2 = char2 - '0';
-	  
-	  switch (sym) {
-	  case '+':
-          return num1 + num2;
-      case '*':
-          return num1 * num2;
-      case '-':
-          return num1 - num2;
-      case '/':
-          return num1 / num2;
-	  }
-	  return 0;
-  }
-  
- 
-  
-  public static boolean symbol (char check) {
-	  switch (check) {
-      case '+':
-          return true;
-      case '*':
-          return true;
-      case '-':
-          return true;
-      case '/':
-          return true;
-      default:
-          return false;
-  }
-  }
 
   /**
    * test cases
